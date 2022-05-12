@@ -22,7 +22,7 @@
 void LCD_Put_Pixel(int x, int y, unsigned int color);
 
 /*变量*/
-static int LCD_fd;
+static int LCD_fb;
 static unsigned char *LCD_memory;
 static int LCD_screen_size;
 static unsigned int pixel_width;
@@ -36,14 +36,14 @@ int main(){
 		虽然不同类型的指针变量在相同的操作系统中所站的字节数相同（32位占4字节，64位占8字节）
 	但是在指针解引用后所占的内存大小是不同的，*(char)占2字节而*(int)占4字节				*/
 	
-	LCD_fd = open("/dev/fb0", O_RDWR);
-	if(LCD_fd < 0){
+	LCD_fb = open("/dev/fb0", O_RDWR);
+	if(LCD_fb < 0){
 		printf("Can not open /dev/fb0\n");
 		return -1;
 	}
 	
 	//用ioctl函数调用LCD驱动文件
-	if( ioctl(LCD_fd, 			//文件描述符
+	if( ioctl(LCD_fb, 			//文件描述符
 		FBIOGET_VSCREENINFO, 	//与驱动程序交互的命令，FBIOGET_VSCREENINFO是和FarmBuffer交互的
 		&var					//var是参数，是根据参数二而定的，此处为根据FBIOGET_VSCREENINFO返回的输出数据
 		) ){
@@ -59,7 +59,7 @@ int main(){
 	Line_width = var.xres * var.bits_per_pixel / 8;	//因为画的是横线所以用xres乘
 	
 	//内存映射
-	LCD_memory = mmap(NULL, LCD_screen_size, PROT_READ | PROT_WRITE, MAP_SHARED, LCD_fd, 0);
+	LCD_memory = mmap(NULL, LCD_screen_size, PROT_READ | PROT_WRITE, MAP_SHARED, LCD_fb, 0);
 	if(LCD_memory == (unsigned char *)-1){
 		printf("Can not mmap\n");
 		return -1;
